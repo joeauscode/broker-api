@@ -232,16 +232,16 @@ class Account(models.Model):
     investment = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     # Cryptocurrency Balances
-    bitcoin_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    ethereum_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    tron_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    doge_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    bitcoin_cash_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    usdt_trc20_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    bnb_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    litecoin_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    usdt_erc20_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    binance_usd_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    bitcoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    ethereum_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    tron_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    doge_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    bitcoin_cash_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    usdt_trc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    bnb_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    litecoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    usdt_erc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    binance_usd_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"

@@ -36,72 +36,6 @@ class RegisterView(APIView):
 
 
 
-
-
-# Create your views here.
-
-# class RegisterView(APIView):
-#     def post(self, request):
-#         serializer = RegistrationSerializer(data=request.data)
-#         if serializer.is_valid():
-#             account = serializer.save()
-#             user = account.user
-#             response_data = {
-#                 "first_name": account.first_name,
-#                 "last_name": account.last_name,
-#                 "phone": account.phone,
-#                 "gender": account.gender,
-#                 "username": user.username,
-#                 "email": account.email,
-#             }
-#             return Response(response_data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
-# class RegisterView(APIView):
-#     def post(self, request):
-#         try:
-#             serializer = RegistrationSerializer(data=request.data)
-#             if serializer.is_valid():
-#                 account = serializer.save()
-#                 response_data = {
-#                     "first_name": account.first_name,
-#                     "last_name": account.last_name,
-#                     "phone": account.phone,
-#                     "gender": account.gender,
-#                     "username": account.user.username,
-#                     "email": account.email,
-#                 }
-#                     user.set_password(password)  # ✅ This hashes the password correctly
-#                     user.save()
-#                 return Response(response_data, status=status.HTTP_201_CREATED)
-#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-        
-# class LoginView(APIView):
-#     def post(self, request):
-#         try:
-#             username = request.data.get('username')
-#             password = request.data.get('password')
-#             user = authenticate(username=username, password=password)
-
-#             if user is not None:
-#                 login(request, user)
-#                 return Response({"message": "User logged in successfully!"}, status=status.HTTP_200_OK)
-#             else:
-#                 return Response({"error": "Invalid username or password."}, status=status.HTTP_401_UNAUTHORIZED)
-
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-
 class LoginView(APIView):
     def post(self, request):
         login_input = request.data.get('username', '').strip()  # username or email
@@ -123,32 +57,6 @@ class LoginView(APIView):
 
 
 
-# User = get_user_model()
-
-# class LoginView(APIView):
-#     def post(self, request):
-#         try:
-#             login_input = request.data.get('username', '').strip()
-#             password = request.data.get('password', '')
-
-#             if not login_input or not password:
-#                 return Response({"error": "Please provide username/email and password."}, status=status.HTTP_400_BAD_REQUEST)
-
-#             user_obj = User.objects.filter(Q(username=login_input) | Q(email=login_input)).first()
-#             if not user_obj:
-#                 return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
-
-#             user = authenticate(username=user_obj.username, password=password)
-#             if user:
-#                 login(request, user)
-#                 return Response({"message": "User logged in successfully!"}, status=status.HTTP_200_OK)
-#             else:
-#                 return Response({"error": "Invalid username/email or password."}, status=status.HTTP_401_UNAUTHORIZED)
-
-#         except Exception as e:
-#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-
 class LogoutView(APIView):
     def post(self, request):
         try:
@@ -159,12 +67,7 @@ class LogoutView(APIView):
 
 
 
-            
-        
-            
-
-
-
+ # Assuming you're using a serializer to send the data
 class DashboardView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -172,27 +75,16 @@ class DashboardView(APIView):
         try:
             user = request.user
             account = Account.objects.get(user=user)
-            user_data = UserSerializer(user).data
-
+            
+            # Convert values to string with full precision
             account_data = {
-                # "account_type": account.account_type,
-                # "balance": account.balance,
-                "created_at": account.date_created,
-                "bitcoin_balance": account.bitcoin_balance,
-                "ethereum_balance": account.ethereum_balance,
-                "tron_balance": account.tron_balance,
-                "doge_balance": account.doge_balance,
-                "bitcoin_cash_balance": account.bitcoin_cash_balance,
-                "usdt_trc20_balance": account.usdt_trc20_balance,
-                "bnb_balance": account.bnb_balance,
-                "litecoin_balance": account.litecoin_balance,
-                "usdt_erc20_balance": account.usdt_erc20_balance,
-                "binance_usd_balance": account.binance_usd_balance,
+                "bitcoin_balance": str(account.bitcoin_balance),  # Ensure full precision
+                "ethereum_balance": str(account.ethereum_balance),
+                # Add other balances as needed
             }
 
             return Response({
                 "message": "Dashboard loaded successfully",
-                "user": user_data,
                 "account": account_data
             }, status=status.HTTP_200_OK)
         
@@ -200,10 +92,8 @@ class DashboardView(APIView):
             return Response({"error": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
-
-
+           
+        
 
 
 class DepositHistoryAPI(APIView):
