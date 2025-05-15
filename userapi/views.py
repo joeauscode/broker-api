@@ -66,32 +66,45 @@ class LogoutView(APIView):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
- # Assuming you're using a serializer to send the data
 class DashboardView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access
 
     def get(self, request):
         try:
+            # Get the authenticated user
             user = request.user
+            # Get the account related to this user
             account = Account.objects.get(user=user)
             
-            # Convert values to string with full precision
+            # Prepare account data
             account_data = {
-                "bitcoin_balance": str(account.bitcoin_balance),  # Ensure full precision
+                "bitcoin_balance": str(account.bitcoin_balance),  # Convert balance to string to maintain full precision
                 "ethereum_balance": str(account.ethereum_balance),
+                "tron_balance": str(account.tron_balance),
+                "doge_balance": str(account.doge_balance),
+                "bitcoin_cash_balance": str(account.bitcoin_cash_balance),
+                "usdt_trc20_balance": str(account.usdt_trc20_balance),
+                "bnb_balance": str(account.bnb_balance),
+                "litecoin_balance": str(account.litecoin_balance),
+                "usdt_erc20_balance": str(account.usdt_erc20_balance),
+                "binance_usd_balance": str(account.binance_usd_balance),
                 # Add other balances as needed
             }
 
+            # Return a success response with the account data
             return Response({
                 "message": "Dashboard loaded successfully",
                 "account": account_data
             }, status=status.HTTP_200_OK)
         
         except Account.DoesNotExist:
+            # If account is not found for the authenticated user
             return Response({"error": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
+        
         except Exception as e:
+            # Handle any other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
            
         
 
