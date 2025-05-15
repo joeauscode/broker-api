@@ -1,15 +1,14 @@
-
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Account
-from . utils import SendMail
+from .utils import SendMail  # make sure this is correct
 
 
 # Serializer for built-in User model
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email']
+        fields = ['username', 'email', 'first_name', 'last_name']
 
 
 # Main serializer for Account model
@@ -56,8 +55,15 @@ class RegistrationSerializer(serializers.ModelSerializer):
         password = validated_data.pop('password1')
         validated_data.pop('password2')
 
-        # Create user
-        user = User.objects.create_user(username=username, email=email, password=password)
+        # Create user and assign names
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+        )
+        user.first_name = validated_data.get('first_name')
+        user.last_name = validated_data.get('last_name')
+        user.save()
 
         # Create account and link to user
         account = Account.objects.create(
@@ -69,6 +75,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             gender=validated_data.get('gender'),
         )
 
-     
-        SendMail(email,account.fullname)
+        fullname = f"{account.first_name} {account.last_name}"
+        SendMail(email, fullname)
+
         return account

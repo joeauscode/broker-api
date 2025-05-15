@@ -10,27 +10,76 @@ from . models import Account
 from . serializers import RegistrationSerializer, UserSerializer
 from django.db.models import Q
 from .models import DepositHistory, WithdrawalHistory
+from rest_framework.authtoken.models import Token
 
-# Create your views here.
+
 
 class RegisterView(APIView):
     def post(self, request):
-        try:
-            serializer = RegistrationSerializer(data=request.data)
-            if serializer.is_valid():
-                account = serializer.save()
-                response_data = {
-                    "first_name": account.first_name,
-                    "last_name": account.last_name,
-                    "phone": account.phone,
-                    "gender": account.gender,
+        # Deserialize the incoming request data
+        serializer = RegistrationSerializer(data=request.data)
+        
+        # Validate and create user
+        if serializer.is_valid():
+            account = serializer.save()  # The account is created here
+            return Response({
+                "message": "Registration successful",
+                "user": {
                     "username": account.user.username,
-                    "email": account.email,
+                    "email": account.user.email,
+                    "first_name": account.first_name,
+                    "last_name": account.last_name
                 }
-                return Response(response_data, status=status.HTTP_201_CREATED)
+            }, status=status.HTTP_201_CREATED)
+        else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+# Create your views here.
+
+# class RegisterView(APIView):
+#     def post(self, request):
+#         serializer = RegistrationSerializer(data=request.data)
+#         if serializer.is_valid():
+#             account = serializer.save()
+#             user = account.user
+#             response_data = {
+#                 "first_name": account.first_name,
+#                 "last_name": account.last_name,
+#                 "phone": account.phone,
+#                 "gender": account.gender,
+#                 "username": user.username,
+#                 "email": account.email,
+#             }
+#             return Response(response_data, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+# class RegisterView(APIView):
+#     def post(self, request):
+#         try:
+#             serializer = RegistrationSerializer(data=request.data)
+#             if serializer.is_valid():
+#                 account = serializer.save()
+#                 response_data = {
+#                     "first_name": account.first_name,
+#                     "last_name": account.last_name,
+#                     "phone": account.phone,
+#                     "gender": account.gender,
+#                     "username": account.user.username,
+#                     "email": account.email,
+#                 }
+#                     user.set_password(password)  # ✅ This hashes the password correctly
+#                     user.save()
+#                 return Response(response_data, status=status.HTTP_201_CREATED)
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
         
@@ -50,30 +99,54 @@ class RegisterView(APIView):
 #         except Exception as e:
 #             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-User = get_user_model()
+
+
 
 class LoginView(APIView):
     def post(self, request):
-        try:
-            login_input = request.data.get('username', '').strip()
-            password = request.data.get('password', '')
+        login_input = request.data.get('username', '').strip()  # username or email
+        password = request.data.get('password', '')
 
-            if not login_input or not password:
-                return Response({"error": "Please provide username/email and password."}, status=status.HTTP_400_BAD_REQUEST)
+        if not login_input or not password:
+            return Response({"error": "Please provide username/email and password."}, status=status.HTTP_400_BAD_REQUEST)
 
-            user_obj = User.objects.filter(Q(username=login_input) | Q(email=login_input)).first()
-            if not user_obj:
-                return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        user_obj = User.objects.filter(Q(username=login_input) | Q(email=login_input)).first()
+        if not user_obj:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
 
-            user = authenticate(username=user_obj.username, password=password)
-            if user:
-                login(request, user)
-                return Response({"message": "User logged in successfully!"}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Invalid username/email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+        user = authenticate(username=user_obj.username, password=password)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({"message": "User logged in successfully!", "token": token.key})
+        else:
+            return Response({"error": "Invalid username/email or password."}, status=status.HTTP_401_UNAUTHORIZED)
 
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# User = get_user_model()
+
+# class LoginView(APIView):
+#     def post(self, request):
+#         try:
+#             login_input = request.data.get('username', '').strip()
+#             password = request.data.get('password', '')
+
+#             if not login_input or not password:
+#                 return Response({"error": "Please provide username/email and password."}, status=status.HTTP_400_BAD_REQUEST)
+
+#             user_obj = User.objects.filter(Q(username=login_input) | Q(email=login_input)).first()
+#             if not user_obj:
+#                 return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#             user = authenticate(username=user_obj.username, password=password)
+#             if user:
+#                 login(request, user)
+#                 return Response({"message": "User logged in successfully!"}, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({"error": "Invalid username/email or password."}, status=status.HTTP_401_UNAUTHORIZED)
+
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
 class LogoutView(APIView):
@@ -83,6 +156,8 @@ class LogoutView(APIView):
             return Response({"message":"User logout successfully!"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 
             
         
@@ -98,11 +173,21 @@ class DashboardView(APIView):
             user = request.user
             account = Account.objects.get(user=user)
             user_data = UserSerializer(user).data
+
             account_data = {
-                "account_type": account.account_type,
-                "balance": account.balance,
-                "created_at": account.created_at,
-                # Add more fields from your Account model if needed
+                # "account_type": account.account_type,
+                # "balance": account.balance,
+                "created_at": account.date_created,
+                "bitcoin_balance": account.bitcoin_balance,
+                "ethereum_balance": account.ethereum_balance,
+                "tron_balance": account.tron_balance,
+                "doge_balance": account.doge_balance,
+                "bitcoin_cash_balance": account.bitcoin_cash_balance,
+                "usdt_trc20_balance": account.usdt_trc20_balance,
+                "bnb_balance": account.bnb_balance,
+                "litecoin_balance": account.litecoin_balance,
+                "usdt_erc20_balance": account.usdt_erc20_balance,
+                "binance_usd_balance": account.binance_usd_balance,
             }
 
             return Response({
