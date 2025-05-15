@@ -64,7 +64,7 @@ class LogoutView(APIView):
             return Response({"message":"User logout successfully!"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+        
 
 class DashboardView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access
@@ -73,11 +73,16 @@ class DashboardView(APIView):
         try:
             # Get the authenticated user
             user = request.user
+            
             # Get the account related to this user
             account = Account.objects.get(user=user)
             
-            # Prepare account data
+            # Prepare account data with user details
             account_data = {
+                "username": user.username,  # Username of the authenticated user
+                "first_name": user.first_name,  # User's first name
+                "last_name": user.last_name,  # User's last name
+                "email": user.email,  # User's email address
                 "bitcoin_balance": str(account.bitcoin_balance),  # Convert balance to string to maintain full precision
                 "ethereum_balance": str(account.ethereum_balance),
                 "tron_balance": str(account.tron_balance),
@@ -104,8 +109,7 @@ class DashboardView(APIView):
         except Exception as e:
             # Handle any other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-           
+ 
         
 
 
@@ -142,3 +146,6 @@ class WithdrawalHistoryAPI(APIView):
             for w in withdrawals
         ]
         return Response(data)
+
+
+
