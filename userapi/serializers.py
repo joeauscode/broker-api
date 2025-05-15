@@ -20,7 +20,7 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = [
             'user', 'first_name', 'last_name', 'phone',
-            'email', 'gender', 'balance', 'created'
+            'email', 'gender', 'created'
         ]
 
 
@@ -35,7 +35,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
         model = Account
         fields = [
             'first_name', 'last_name', 'username', 'email',
-            'password1', 'password2', 'phone', 'gender', 'balance'
+            'password1', 'password2', 'phone', 'gender'
         ]
 
     def validate(self, data):
@@ -67,7 +67,6 @@ class RegistrationSerializer(serializers.ModelSerializer):
             phone=validated_data.get('phone'),
             email=email,
             gender=validated_data.get('gender'),
-            balance=validated_data.get('balance'),
         )
 
      

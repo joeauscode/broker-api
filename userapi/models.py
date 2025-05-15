@@ -1,6 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+CRYPTO_CHOICES = [
+    ('BTC', 'Bitcoin'),
+    ('ETH', 'Ethereum'),
+    ('TRX', 'Tron'),
+    ('DOGE', 'Doge'),
+    ('BCH', 'Bitcoin Cash'),
+    ('USDT_TRC20', 'USDT TRC20'),
+    ('BNB', 'Binance Coin'),
+    ('LTC', 'Litecoin'),
+    ('USDT_ERC20', 'USDT ERC20'),
+    ('BUSD', 'Binance USD'),
+]
+
 GENDER_CHOICE = [
     ('Male', 'Male'),
     ('Female', 'Female'),
@@ -206,15 +219,117 @@ COUNTRY_CHOICES = [
 
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    account_id = models.CharField(max_length=9, unique=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=10, null=True, blank=True)
     email = models.EmailField(unique=True)
     nationality = models.CharField(max_length=100, choices=COUNTRY_CHOICES, blank=True, null=True)
-    gender = models.CharField(max_length=6, choices=GENDER_CHOICE)
-    balance = models.DecimalField(max_digits=10, decimal_places=2)
-    created = models.DateField(auto_now_add=True)
+    gender = models.CharField(max_length=6, choices=GENDER_CHOICE, blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    # Investment (optional if still needed)
+    investment = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    # Cryptocurrency Balances
+    bitcoin_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ethereum_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    tron_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    doge_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    bitcoin_cash_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    usdt_trc20_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    bnb_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    litecoin_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    usdt_erc20_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    binance_usd_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    @property
+    def fullname(self):
+        return f"{self.first_name} {self.last_name}"
+
+    def deposit(self, crypto: str, amount, description=""):
+        field_map = {
+            'BTC': 'bitcoin_balance',
+            'ETH': 'ethereum_balance',
+            'TRX': 'tron_balance',
+            'DOGE': 'doge_balance',
+            'BCH': 'bitcoin_cash_balance',
+            'USDT_TRC20': 'usdt_trc20_balance',
+            'BNB': 'bnb_balance',
+            'LTC': 'litecoin_balance',
+            'USDT_ERC20': 'usdt_erc20_balance',
+            'BUSD': 'binance_usd_balance',
+        }
+        field = field_map.get(crypto)
+        if not field:
+            raise ValueError("Invalid cryptocurrency type")
+
+        current_balance = getattr(self, field)
+        setattr(self, field, current_balance + amount)
+        self.save()
+
+        DepositHistory.objects.create(
+            account=self,
+            crypto=crypto,
+            amount=amount,
+            description=description,
+        )
+
+    def withdraw(self, crypto: str, amount, description=""):
+        field_map = {
+            'BTC': 'bitcoin_balance',
+            'ETH': 'ethereum_balance',
+            'TRX': 'tron_balance',
+            'DOGE': 'doge_balance',
+            'BCH': 'bitcoin_cash_balance',
+            'USDT_TRC20': 'usdt_trc20_balance',
+            'BNB': 'bnb_balance',
+            'LTC': 'litecoin_balance',
+            'USDT_ERC20': 'usdt_erc20_balance',
+            'BUSD': 'binance_usd_balance',
+        }
+        field = field_map.get(crypto)
+        if not field:
+            raise ValueError("Invalid cryptocurrency type")
+
+        current_balance = getattr(self, field)
+        if current_balance >= amount:
+            setattr(self, field, current_balance - amount)
+            self.save()
+
+            WithdrawalHistory.objects.create(
+                account=self,
+                crypto=crypto,
+                amount=amount,
+                description=description,
+            )
+        else:
+            raise ValueError("Insufficient balance")
+
+class DepositHistory(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='deposits')
+    crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES, default='BTC')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.account.fullname} - {self.crypto} Deposit: {self.amount}"
+
+
+class WithdrawalHistory(models.Model):
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='withdrawals')
+    crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES, default='BTC')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    description = models.TextField(blank=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.account.fullname} - {self.crypto} Withdrawal: {self.amount}"
+
+
+
+
