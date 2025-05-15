@@ -221,7 +221,7 @@ class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
-    phone = models.CharField(max_length=10, null=True, blank=True)
+    phone = models.CharField(max_length=12, null=True, blank=True)
     email = models.EmailField(unique=True)
     nationality = models.CharField(max_length=100, choices=COUNTRY_CHOICES, blank=True, null=True)
     gender = models.CharField(max_length=6, choices=GENDER_CHOICE, blank=True, null=True)
