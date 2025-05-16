@@ -1,16 +1,23 @@
 from django.shortcuts import render
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework import serializers,status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.views import View
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate,login,logout,get_user_model
-from . models import Account
+from .models import Account
 from . serializers import RegistrationSerializer, UserSerializer
 from django.db.models import Q
 from .models import DepositHistory, WithdrawalHistory
 from rest_framework.authtoken.models import Token
+import requests
+from django.conf import settings
+from django.http import JsonResponse, HttpResponse
+import json
+
 
 
 
@@ -83,6 +90,7 @@ class DashboardView(APIView):
                 "first_name": user.first_name,  # User's first name
                 "last_name": user.last_name,  # User's last name
                 "email": user.email,  # User's email address
+                "date_created": account.date_created.strftime('%Y-%m-%d %H:%M:%S'),
                 "bitcoin_balance": str(account.bitcoin_balance),  # Convert balance to string to maintain full precision
                 "ethereum_balance": str(account.ethereum_balance),
                 "tron_balance": str(account.tron_balance),
@@ -117,8 +125,10 @@ class DepositHistoryAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_account = request.user.account  # adjust if necessary
+        user_account = request.user.account  # Adjust if necessary
         deposits = DepositHistory.objects.filter(account=user_account).order_by('-timestamp')
+        
+        # Prepare deposit history data
         data = [
             {
                 'timestamp': d.timestamp.isoformat(),
@@ -129,6 +139,8 @@ class DepositHistoryAPI(APIView):
             for d in deposits
         ]
         return Response(data)
+
+
 
 class WithdrawalHistoryAPI(APIView):
     permission_classes = [IsAuthenticated]
@@ -149,3 +161,65 @@ class WithdrawalHistoryAPI(APIView):
 
 
 
+
+
+
+
+
+
+
+
+
+# userapi/views.py
+
+
+
+
+
+
+class CreatePaymentView(View):
+    def get(self, request):
+        headers = {
+            'x-api-key': settings.NOWPAYMENTS_API_KEY,
+            'Content-Type': 'application/json'
+        }
+
+        data = {
+            "price_amount": 10,
+            "price_currency": "usd",
+            "pay_currency": "btc",
+            "order_id": "1234",
+            "order_description": "Test order",
+            "ipn_callback_url": "http://localhost:8000/api/payment-ipn/" 
+            
+        }
+
+        response = requests.post(
+            'https://api.nowpayments.io/v1/payment',
+            json=data,
+            headers=headers
+        )
+        
+        print("Status Code:", response.status_code)
+        print("Response Text:", response.text)
+
+        try:
+            return JsonResponse(response.json())
+        except Exception as e:
+            return JsonResponse({
+                "error": "Failed to parse JSON response",
+                "details": str(e),
+                "raw_response": response.text
+            }, status=500)
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def payment_ipn(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        print("IPN data received:", data)
+        # Process the payment update here
+        return HttpResponse('IPN received', status=200)
+    return HttpResponse('Method not allowed', status=405)

@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from django.conf import settings
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +26,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-%j(s=-v38pxb$op(ufs)j)07_5+nuer&m5^6^-vwd-)%1#7zp('
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
+
+
+# settings.py
+
+NOWPAYMENTS_API_KEY = '8GC7REC-6P64GR1-QNXDTA2-760PHVJ'
+
+
+NOWPAYMENTS_IPN_SECRET = 'Ts3+yPo+51xwBY30FBBrlhINXnCWgDvs'  # if you have one
+
+
+
+
+
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']

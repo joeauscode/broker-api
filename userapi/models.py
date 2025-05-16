@@ -312,24 +312,39 @@ class Account(models.Model):
 class DepositHistory(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='deposits')
     crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES, default='BTC')
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=20, decimal_places=10)
     description = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.account.fullname} - {self.crypto} Deposit: {self.amount}"
 
+    @property
+    def crypto_symbol(self):
+        return {
+            'BTC': '₿', 'ETH': 'Ξ', 'TRX': '₮', 'DOGE': 'Ð',
+            'USDT_TRC20': '₮', 'USDT_ERC20': '₮', 'BUSD': '$',
+            'BCH': 'Ƀ', 'LTC': 'Ł', 'BNB': '⧫',
+        }.get(self.crypto, '')
+
+    
+    
 
 class WithdrawalHistory(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='withdrawals')
     crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES, default='BTC')
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=20, decimal_places=10)
     description = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.account.fullname} - {self.crypto} Withdrawal: {self.amount}"
 
-
-
+    @property
+    def crypto_symbol(self):
+        return {
+            'BTC': '₿', 'ETH': 'Ξ', 'TRX': '₮', 'DOGE': 'Ð',
+            'USDT_TRC20': '₮', 'USDT_ERC20': '₮', 'BUSD': '$',
+            'BCH': 'Ƀ', 'LTC': 'Ł', 'BNB': '⧫',
+        }.get(self.crypto, '')
 
