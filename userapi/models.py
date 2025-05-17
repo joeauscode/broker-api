@@ -348,3 +348,8 @@ class WithdrawalHistory(models.Model):
             'BCH': 'Ƀ', 'LTC': 'Ł', 'BNB': '⧫',
         }.get(self.crypto, '')
 
+
+
+
+
+

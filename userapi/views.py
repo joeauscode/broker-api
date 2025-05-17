@@ -17,18 +17,21 @@ import requests
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 import json
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
 
+
+
+from rest_framework.permissions import AllowAny
 
 class RegisterView(APIView):
+    permission_classes = [AllowAny]   
+
     def post(self, request):
-        # Deserialize the incoming request data
         serializer = RegistrationSerializer(data=request.data)
-        
-        # Validate and create user
         if serializer.is_valid():
-            account = serializer.save()  # The account is created here
+            account = serializer.save()
             return Response({
                 "message": "Registration successful",
                 "user": {
@@ -43,7 +46,10 @@ class RegisterView(APIView):
 
 
 
+
 class LoginView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         login_input = request.data.get('username', '').strip()  # username or email
         password = request.data.get('password', '')
@@ -65,6 +71,7 @@ class LoginView(APIView):
 
 
 class LogoutView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         try:
             logout(request)
@@ -72,8 +79,10 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
+        
 
 class DashboardView(APIView):
+    permission_classes = [AllowAny]
     permission_classes = [IsAuthenticated]  # Only authenticated users can access
 
     def get(self, request):
@@ -170,56 +179,3 @@ class WithdrawalHistoryAPI(APIView):
 
 
 
-# userapi/views.py
-
-
-
-
-
-
-class CreatePaymentView(View):
-    def get(self, request):
-        headers = {
-            'x-api-key': settings.NOWPAYMENTS_API_KEY,
-            'Content-Type': 'application/json'
-        }
-
-        data = {
-            "price_amount": 10,
-            "price_currency": "usd",
-            "pay_currency": "btc",
-            "order_id": "1234",
-            "order_description": "Test order",
-            "ipn_callback_url": "http://localhost:8000/api/payment-ipn/" 
-            
-        }
-
-        response = requests.post(
-            'https://api.nowpayments.io/v1/payment',
-            json=data,
-            headers=headers
-        )
-        
-        print("Status Code:", response.status_code)
-        print("Response Text:", response.text)
-
-        try:
-            return JsonResponse(response.json())
-        except Exception as e:
-            return JsonResponse({
-                "error": "Failed to parse JSON response",
-                "details": str(e),
-                "raw_response": response.text
-            }, status=500)
-
-
-from django.views.decorators.csrf import csrf_exempt
-
-@csrf_exempt
-def payment_ipn(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        print("IPN data received:", data)
-        # Process the payment update here
-        return HttpResponse('IPN received', status=200)
-    return HttpResponse('Method not allowed', status=405)
