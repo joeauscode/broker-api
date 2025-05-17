@@ -368,3 +368,28 @@ class Investment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.payment_method}"
+
+
+
+
+
+
+
+
+
+class InvestmentHistory(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('declined', 'Declined'),
+        ('completed', 'Completed'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='investment_histories')
+    payment_method = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.payment_method} - {self.amount} ({self.status})"

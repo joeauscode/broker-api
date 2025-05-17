@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Account, Investment, DepositHistory
+from .models import Account, Investment, DepositHistory, InvestmentHistory
 from .utils import SendMail
+
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -85,3 +86,16 @@ class DepositHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = DepositHistory
         fields = '__all__'  # Or specify fields as needed
+
+
+
+
+
+
+
+
+class InvestmentHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InvestmentHistory
+        fields = ['id', 'user', 'payment_method', 'amount', 'status', 'date']
+        read_only_fields = ['user', 'date']

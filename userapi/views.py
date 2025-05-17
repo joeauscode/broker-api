@@ -9,11 +9,12 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 
-from .models import Account, DepositHistory, WithdrawalHistory, Investment
+from .models import Account, DepositHistory, WithdrawalHistory, Investment, InvestmentHistory
 from .serializers import (
     RegistrationSerializer,
     DepositHistorySerializer,
     InvestmentSerializer,
+    InvestmentHistorySerializer,
 )
 
 
@@ -135,4 +136,15 @@ class WithdrawalHistoryAPI(APIView):
 def investments_api(request):
     investments = Investment.objects.filter(user=request.user)
     serializer = InvestmentSerializer(investments, many=True)
+    return Response(serializer.data)
+
+
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def investment_history_list(request):
+    histories = InvestmentHistory.objects.filter(user=request.user)
+    serializer = InvestmentHistorySerializer(histories, many=True)
     return Response(serializer.data)
