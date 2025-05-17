@@ -59,7 +59,14 @@ NOWPAYMENTS_IPN_SECRET = 'Ts3+yPo+51xwBY30FBBrlhINXnCWgDvs'  # if you have one
 DEBUG = env('DEBUG')
 
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'pythoonadmin-2.onrender.com',  
+]
+
 
 
 CSRF_TRUSTED_ORIGINS = [
