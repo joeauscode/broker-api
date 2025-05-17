@@ -6,12 +6,14 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 
 from .models import Account, DepositHistory, WithdrawalHistory, Investment, InvestmentHistory
 from .serializers import (
     RegistrationSerializer,
+    AccountSerializer,
     DepositHistorySerializer,
     InvestmentSerializer,
     InvestmentHistorySerializer,
@@ -77,12 +79,13 @@ class DashboardView(APIView):
         try:
             user = request.user
             account = Account.objects.get(user=user)
-
+        
             account_data = {
                 "username": user.username,
                 "first_name": user.first_name,
                 "last_name": user.last_name,
                 "email": user.email,
+                "avatar_url": account.avatar.url if account.avatar else None,
                 "date_created": account.date_created.strftime('%Y-%m-%d %H:%M:%S'),
                 "bitcoin_balance": str(account.bitcoin_balance),
                 "ethereum_balance": str(account.ethereum_balance),
@@ -111,6 +114,10 @@ class DepositHistoryAPI(APIView):
         deposits = DepositHistory.objects.filter(account=user_account).order_by('-timestamp')
         serializer = DepositHistorySerializer(deposits, many=True)
         return Response(serializer.data)
+   
+    
+   
+
 
 
 class WithdrawalHistoryAPI(APIView):
@@ -148,3 +155,28 @@ def investment_history_list(request):
     histories = InvestmentHistory.objects.filter(user=request.user)
     serializer = InvestmentHistorySerializer(histories, many=True)
     return Response(serializer.data)
+
+
+
+
+
+
+
+
+
+
+class AvatarUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        account = Account.objects.get(user=user)
+        
+        avatar_file = request.data.get('avatar')
+        if avatar_file:
+            account.avatar = avatar_file
+            account.save()
+            return Response({"message": "Avatar uploaded successfully", "avatar_url": request.build_absolute_uri(account.avatar.url)}, status=status.HTTP_200_OK)
+        else:
+            return Response({"error": "No avatar file provided"}, status=status.HTTP_400_BAD_REQUEST)

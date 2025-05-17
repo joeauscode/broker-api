@@ -229,6 +229,7 @@ class Account(models.Model):
     gender = models.CharField(max_length=6, choices=GENDER_CHOICE, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     # Investment (optional if still needed)
     investment = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)

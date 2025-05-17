@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Account, DepositHistory, WithdrawalHistory, Investment, InvestmentHistory
+from django.utils.html import format_html
 
 # Customizing the display of the Account model in the admin panel
 @admin.register(Account)
@@ -8,7 +9,7 @@ class AccountAdmin(admin.ModelAdmin):
         'user', 'investment', 'bitcoin_balance', 'ethereum_balance', 
         'tron_balance', 'doge_balance', 'bitcoin_cash_balance', 'usdt_trc20_balance',
         'bnb_balance', 'litecoin_balance', 'usdt_erc20_balance', 'binance_usd_balance',
-        'date_created', 'last_updated'
+        'avatar_preview', 'date_created', 'last_updated'
     )
     search_fields = ('user__username',)
     list_filter = ('date_created',)
@@ -16,8 +17,16 @@ class AccountAdmin(admin.ModelAdmin):
     fields = (
         'user', 'investment', 'bitcoin_balance', 'ethereum_balance', 
         'tron_balance', 'doge_balance', 'bitcoin_cash_balance', 'usdt_trc20_balance',
-        'bnb_balance', 'litecoin_balance', 'usdt_erc20_balance', 'binance_usd_balance'
+        'bnb_balance', 'litecoin_balance', 'usdt_erc20_balance', 'binance_usd_balance', 'avatar'
     )
+
+
+    def avatar_preview(self, obj):
+        if obj.avatar:
+            return format_html('<img src="{}" width="50" height="50" style="object-fit: cover; border-radius: 50%;" />', obj.avatar.url)
+        return "-"
+    avatar_preview.short_description = 'Avatar Preview'
+
 
 
 @admin.register(Investment)

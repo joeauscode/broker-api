@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Account, Investment, DepositHistory, InvestmentHistory
 from .utils import SendMail
+from django.contrib.sites.shortcuts import get_current_site
 
 
 
@@ -13,13 +14,20 @@ class UserSerializer(serializers.ModelSerializer):
 
 class AccountSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    avatar_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Account
         fields = [
             'user', 'first_name', 'last_name', 'phone',
-            'email', 'gender', 'date_created'
+            'email', 'gender', 'date_created', 'avatar', 'avatar_url'
         ]
+        
+    def get_avatar_url(self, obj):
+        request = self.context.get('request')
+        if obj.avatar and hasattr(obj.avatar, 'url'):
+            return request.build_absolute_uri(obj.avatar.url)
+        return None
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

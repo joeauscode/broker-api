@@ -3,6 +3,8 @@ from django.urls import path
 
 
 
+
+
 urlpatterns = [
     path('register/', views.RegisterView.as_view(), name='register'),
     path('login/', views.LoginView.as_view(), name='login'),
@@ -12,8 +14,13 @@ urlpatterns = [
     path('deposithistory/', views.investment_history_list),
     path('withdrawals/', views.WithdrawalHistoryAPI.as_view(), name='withdrawal_history_api'),
     path('investments/', views.investments_api, name='investments-api'),
+    path('upload-avatar/', views.AvatarUploadView.as_view(), name='upload-avatar'),
     
 ]
+
+
+
+
 
 
 

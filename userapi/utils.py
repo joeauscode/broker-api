@@ -26,8 +26,19 @@ from django.core.mail import send_mail
 from django.conf import settings
 
 def SendMail(to_email, fullname):
-    subject = "Welcome to Our Service"
-    message = f"Hello {fullname},\n\nThank you for registering with us!\n\nBest regards,\nYour Company"
+    subject = "GeoChain"
+    message = f"""\
+Hello {fullname},
+
+Thank you for registering with us!
+
+We're excited to have you on board and look forward to providing you with the best experience possible.
+
+If you have any questions or need assistance, feel free to reach out to our support team anytime.
+
+Best regards,  
+GeoChain Team
+"""
     from_email = settings.DEFAULT_FROM_EMAIL  # Make sure to define this in your settings.py
     
     send_mail(subject, message, from_email, [to_email])
