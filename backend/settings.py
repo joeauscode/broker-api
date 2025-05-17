@@ -66,6 +66,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'pythoonadmin-2.onrender.com',  
     'www.pythoonadmin-2.onrender.com'
+    'https://pythoonadmin-2.onrender.com'
 ]
 
 
