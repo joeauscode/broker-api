@@ -1,32 +1,24 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import serializers,status
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.db.models import Q
+
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from django.views import View
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate,login,logout,get_user_model
-from .models import Account
-from . serializers import RegistrationSerializer, UserSerializer
-from django.db.models import Q
-from .models import DepositHistory, WithdrawalHistory
-from rest_framework.authtoken.models import Token
-import requests
-from django.conf import settings
-from django.http import JsonResponse, HttpResponse
-import json
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authtoken.models import Token
 
+from .models import Account, DepositHistory, WithdrawalHistory, Investment
+from .serializers import (
+    RegistrationSerializer,
+    DepositHistorySerializer,
+    InvestmentSerializer,
+)
 
-
-
-
-from rest_framework.permissions import AllowAny
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny]   
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
@@ -38,24 +30,22 @@ class RegisterView(APIView):
                     "username": account.user.username,
                     "email": account.user.email,
                     "first_name": account.first_name,
-                    "last_name": account.last_name
+                    "last_name": account.last_name,
                 }
             }, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        login_input = request.data.get('username', '').strip()  # username or email
+        login_input = request.data.get('username', '').strip()
         password = request.data.get('password', '')
 
         if not login_input or not password:
-            return Response({"error": "Please provide username/email and password."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Please provide username/email and password."},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         user_obj = User.objects.filter(Q(username=login_input) | Q(email=login_input)).first()
         if not user_obj:
@@ -63,44 +53,37 @@ class LoginView(APIView):
 
         user = authenticate(username=user_obj.username, password=password)
         if user:
-            token, created = Token.objects.get_or_create(user=user)
+            token, _ = Token.objects.get_or_create(user=user)
             return Response({"message": "User logged in successfully!", "token": token.key})
-        else:
-            return Response({"error": "Invalid username/email or password."}, status=status.HTTP_401_UNAUTHORIZED)
-
+        return Response({"error": "Invalid username/email or password."}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
+
     def post(self, request):
         try:
             logout(request)
-            return Response({"message":"User logout successfully!"}, status=status.HTTP_200_OK)
+            return Response({"message": "User logged out successfully!"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-        
+
 
 class DashboardView(APIView):
-    permission_classes = [AllowAny]
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
         try:
-            # Get the authenticated user
             user = request.user
-            
-            # Get the account related to this user
             account = Account.objects.get(user=user)
-            
-            # Prepare account data with user details
+
             account_data = {
-                "username": user.username,  # Username of the authenticated user
-                "first_name": user.first_name,  # User's first name
-                "last_name": user.last_name,  # User's last name
-                "email": user.email,  # User's email address
+                "username": user.username,
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "email": user.email,
                 "date_created": account.date_created.strftime('%Y-%m-%d %H:%M:%S'),
-                "bitcoin_balance": str(account.bitcoin_balance),  # Convert balance to string to maintain full precision
+                "bitcoin_balance": str(account.bitcoin_balance),
                 "ethereum_balance": str(account.ethereum_balance),
                 "tron_balance": str(account.tron_balance),
                 "doge_balance": str(account.doge_balance),
@@ -110,45 +93,23 @@ class DashboardView(APIView):
                 "litecoin_balance": str(account.litecoin_balance),
                 "usdt_erc20_balance": str(account.usdt_erc20_balance),
                 "binance_usd_balance": str(account.binance_usd_balance),
-                # Add other balances as needed
             }
+            return Response({"message": "Dashboard loaded successfully", "account": account_data}, status=status.HTTP_200_OK)
 
-            # Return a success response with the account data
-            return Response({
-                "message": "Dashboard loaded successfully",
-                "account": account_data
-            }, status=status.HTTP_200_OK)
-        
         except Account.DoesNotExist:
-            # If account is not found for the authenticated user
             return Response({"error": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
-        
         except Exception as e:
-            # Handle any other exceptions
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
- 
-        
 
 
 class DepositHistoryAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        user_account = request.user.account  # Adjust if necessary
+        user_account = request.user.account
         deposits = DepositHistory.objects.filter(account=user_account).order_by('-timestamp')
-        
-        # Prepare deposit history data
-        data = [
-            {
-                'timestamp': d.timestamp.isoformat(),
-                'crypto': d.crypto,
-                'amount': float(d.amount),
-                'description': d.description,
-            }
-            for d in deposits
-        ]
-        return Response(data)
-
+        serializer = DepositHistorySerializer(deposits, many=True)
+        return Response(serializer.data)
 
 
 class WithdrawalHistoryAPI(APIView):
@@ -169,13 +130,9 @@ class WithdrawalHistoryAPI(APIView):
         return Response(data)
 
 
-
-
-
-
-
-
-
-
-
-
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def investments_api(request):
+    investments = Investment.objects.filter(user=request.user)
+    serializer = InvestmentSerializer(investments, many=True)
+    return Response(serializer.data)

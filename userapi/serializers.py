@@ -1,34 +1,31 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Account
-from .utils import SendMail  # make sure this is correct
+from .models import Account, Investment, DepositHistory
+from .utils import SendMail
 
 
-# Serializer for built-in User model
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name', 'last_name']
 
 
-# Main serializer for Account model
 class AccountSerializer(serializers.ModelSerializer):
-    user = UserSerializer()  # Nested user info
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Account
         fields = [
             'user', 'first_name', 'last_name', 'phone',
-            'email', 'gender', 'created'
+            'email', 'gender', 'date_created'
         ]
 
 
-# Registration serializer (creates both User and Account)
 class RegistrationSerializer(serializers.ModelSerializer):
-    password1 = serializers.CharField(write_only=True)
-    password2 = serializers.CharField(write_only=True)
     username = serializers.CharField(write_only=True)
     email = serializers.EmailField(write_only=True)
+    password1 = serializers.CharField(write_only=True)
+    password2 = serializers.CharField(write_only=True)
 
     class Meta:
         model = Account
@@ -44,28 +41,25 @@ class RegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Username already exists')
         if User.objects.filter(email=data['email']).exists():
             raise serializers.ValidationError('Email already exists')
-        if Account.objects.filter(phone=data['phone']).exists():
+        if Account.objects.filter(phone=data.get('phone')).exists():
             raise serializers.ValidationError('Phone number already exists')
         return data
 
     def create(self, validated_data):
-        # Extract user data
         username = validated_data.pop('username')
         email = validated_data.pop('email')
         password = validated_data.pop('password1')
         validated_data.pop('password2')
 
-        # Create user and assign names
         user = User.objects.create_user(
             username=username,
             email=email,
             password=password,
+            first_name=validated_data.get('first_name'),
+            last_name=validated_data.get('last_name'),
         )
-        user.first_name = validated_data.get('first_name')
-        user.last_name = validated_data.get('last_name')
         user.save()
 
-        # Create account and link to user
         account = Account.objects.create(
             user=user,
             first_name=validated_data.get('first_name'),
@@ -79,3 +73,15 @@ class RegistrationSerializer(serializers.ModelSerializer):
         SendMail(email, fullname)
 
         return account
+
+
+class InvestmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Investment
+        fields = ['payment_method', 'earnings', 'total_profit', 'activation_date', 'end_date', 'status']
+
+
+class DepositHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DepositHistory
+        fields = '__all__'  # Or specify fields as needed

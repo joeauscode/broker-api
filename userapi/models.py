@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
+
 CRYPTO_CHOICES = [
     ('BTC', 'Bitcoin'),
     ('ETH', 'Ethereum'),
@@ -353,3 +355,16 @@ class WithdrawalHistory(models.Model):
 
 
 
+
+
+class Investment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='investments')
+    payment_method = models.CharField(max_length=100)
+    earnings = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_profit = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    activation_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(max_length=50)  # e.g., "active", "completed", "pending"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.payment_method}"
