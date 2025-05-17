@@ -23,13 +23,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import environ
 from pathlib import Path
-from django.conf import settings
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Initialize environment
+# Load environment variables
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / '.env')  # Explicitly specify path to .env file
+environ.Env.read_env(BASE_DIR / ".env")
 
 
 
@@ -57,9 +56,8 @@ NOWPAYMENTS_IPN_SECRET = 'Ts3+yPo+51xwBY30FBBrlhINXnCWgDvs'  # if you have one
 
 
 
+DEBUG = env('DEBUG')
 
-
-DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -212,11 +210,3 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
-
-
-
-
-
-
-
-
