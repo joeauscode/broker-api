@@ -17,11 +17,3 @@ urlpatterns = [
     path('upload-avatar/', views.AvatarUploadView.as_view(), name='upload-avatar'),
     
 ]
-
-
-
-
-
-
-
-

@@ -70,16 +70,26 @@ class LogoutView(APIView):
             return Response({"message": "User logged out successfully!"}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
 
+
+
+        from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from .models import Account  # Make sure Account model is imported
 
 class DashboardView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view
 
+    # GET method to load dashboard data
     def get(self, request):
         try:
-            user = request.user
-            account = Account.objects.get(user=user)
-        
+            user = request.user  # Get the currently logged-in user
+            account = Account.objects.get(user=user)  # Get the account linked to the user
+            
+            # Prepare the account data
             account_data = {
                 "username": user.username,
                 "first_name": user.first_name,
@@ -87,6 +97,7 @@ class DashboardView(APIView):
                 "email": user.email,
                 "avatar_url": account.avatar.url if account.avatar else None,
                 "date_created": account.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+                "balance": str(account.balance),  # Convert balance to string
                 "bitcoin_balance": str(account.bitcoin_balance),
                 "ethereum_balance": str(account.ethereum_balance),
                 "tron_balance": str(account.tron_balance),
@@ -98,12 +109,78 @@ class DashboardView(APIView):
                 "usdt_erc20_balance": str(account.usdt_erc20_balance),
                 "binance_usd_balance": str(account.binance_usd_balance),
             }
+            # Return the dashboard data in the response
             return Response({"message": "Dashboard loaded successfully", "account": account_data}, status=status.HTTP_200_OK)
-
+        
         except Account.DoesNotExist:
             return Response({"error": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # PATCH method to deduct an amount from the balance
+    def patch(self, request):
+        try:
+            user = request.user  # Get the currently logged-in user
+            account = Account.objects.get(user=user)  # Get the account linked to the user
+            
+            # Extract the amount to deduct from the request body
+            amount_to_deduct = request.data.get('amount', 0.0)
+            
+            # Check if the amount is valid
+            if amount_to_deduct <= 0:
+                return Response({"error": "Amount must be greater than zero."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check if the user has enough balance to deduct the amount
+            if account.balance < amount_to_deduct:
+                return Response({"error": "Insufficient balance."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Deduct the amount from the balance
+            account.balance -= amount_to_deduct
+            account.save()
+
+            # Return the updated balance
+            return Response({"balance": str(account.balance)}, status=status.HTTP_200_OK)
+        
+        except Account.DoesNotExist:
+            return Response({"error": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+# class DashboardView(APIView):
+#     permission_classes = [IsAuthenticated]
+
+#     def get(self, request):
+#         try:
+#             user = request.user
+#             account = Account.objects.get(user=user)
+        
+#             account_data = {
+#                 "username": user.username,
+#                 "first_name": user.first_name,
+#                 "last_name": user.last_name,
+#                 "email": user.email,
+#                 "avatar_url": account.avatar.url if account.avatar else None,
+#                 "date_created": account.date_created.strftime('%Y-%m-%d %H:%M:%S'),
+#                 "balance": str(account.balance),
+#                 "bitcoin_balance": str(account.bitcoin_balance),
+#                 "ethereum_balance": str(account.ethereum_balance),
+#                 "tron_balance": str(account.tron_balance),
+#                 "doge_balance": str(account.doge_balance),
+#                 "bitcoin_cash_balance": str(account.bitcoin_cash_balance),
+#                 "usdt_trc20_balance": str(account.usdt_trc20_balance),
+#                 "bnb_balance": str(account.bnb_balance),
+#                 "litecoin_balance": str(account.litecoin_balance),
+#                 "usdt_erc20_balance": str(account.usdt_erc20_balance),
+#                 "binance_usd_balance": str(account.binance_usd_balance),
+#             }
+#             return Response({"message": "Dashboard loaded successfully", "account": account_data}, status=status.HTTP_200_OK)
+
+#         except Account.DoesNotExist:
+#             return Response({"error": "Account not found."}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class DepositHistoryAPI(APIView):

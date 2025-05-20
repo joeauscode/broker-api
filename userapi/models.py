@@ -230,9 +230,11 @@ class Account(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
+  
+    
 
     # Investment (optional if still needed)
-    investment = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     # Cryptocurrency Balances
     bitcoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
@@ -245,6 +247,7 @@ class Account(models.Model):
     litecoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
     usdt_erc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
     binance_usd_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
