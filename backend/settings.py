@@ -66,16 +66,16 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'www.geochain.app',
-    'geochain.app'  
+    'geochain.app',
     'pythoonadmin-1n4o.onrender.com',
     'www.pythoonadmin-1n4o.onrender.com',
 ]
 
-
-
 CSRF_TRUSTED_ORIGINS = [
     'https://geochain.app',
     'https://www.geochain.app',
+    'https://pythoonadmin-1n4o.onrender.com',
+    'https://www.pythoonadmin-1n4o.onrender.com',
 ]
 
 
