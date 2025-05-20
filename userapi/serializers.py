@@ -20,7 +20,7 @@ class AccountSerializer(serializers.ModelSerializer):
         model = Account
         fields = [
             'user', 'first_name', 'last_name', 'phone',
-            'email', 'gender', 'balance', 'date_created', 'avatar', 'avatar_url'
+            'email', 'gender', 'balance', 'date_created', 'avatar', 'avatar_url',
         ]
         
     def get_avatar_url(self, obj):

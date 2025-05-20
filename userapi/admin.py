@@ -9,7 +9,8 @@ class AccountAdmin(admin.ModelAdmin):
         'user', 'balance', 'bitcoin_balance', 'ethereum_balance', 
         'tron_balance', 'doge_balance', 'bitcoin_cash_balance', 'usdt_trc20_balance',
         'bnb_balance', 'litecoin_balance', 'usdt_erc20_balance', 'binance_usd_balance',
-        'avatar_preview', 'date_created', 'last_updated'
+        'avatar_preview', 'date_created', 'last_updated', 'gold_balance', 'steel_balance', 
+        'iron_ore_balance', 'lithium_balance',        
     )
     search_fields = ('user__username',)
     list_filter = ('date_created',)

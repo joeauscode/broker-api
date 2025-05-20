@@ -1,7 +1,11 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.db.models import Q
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+from .models import Account 
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -74,11 +78,7 @@ class LogoutView(APIView):
 
 
 
-        from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from .models import Account  # Make sure Account model is imported
+ # Make sure Account model is imported
 
 class DashboardView(APIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access this view

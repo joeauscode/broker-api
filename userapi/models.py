@@ -236,6 +236,10 @@ class Account(models.Model):
     # Investment (optional if still needed)
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
+    usdt_erc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    binance_usd_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    bnb_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    litecoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
     # Cryptocurrency Balances
     bitcoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
     ethereum_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
@@ -243,10 +247,10 @@ class Account(models.Model):
     doge_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
     bitcoin_cash_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
     usdt_trc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    bnb_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    litecoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    usdt_erc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    binance_usd_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    gold_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    steel_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    iron_ore_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    lithium_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
     
 
     def __str__(self):
@@ -264,10 +268,10 @@ class Account(models.Model):
             'DOGE': 'doge_balance',
             'BCH': 'bitcoin_cash_balance',
             'USDT_TRC20': 'usdt_trc20_balance',
-            'BNB': 'bnb_balance',
-            'LTC': 'litecoin_balance',
-            'USDT_ERC20': 'usdt_erc20_balance',
-            'BUSD': 'binance_usd_balance',
+            'Gold': 'gold_balance',
+            'Steel': 'steel_balance',
+            'Iron ore': 'iron_ore_balance',
+            'Lithium': 'lithium_balance',
         }
         field = field_map.get(crypto)
         if not field:
