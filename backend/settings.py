@@ -67,6 +67,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'www.geochain.app',
     'geochain.app'  
+    'pythoonadmin-1n4o.onrender.com',
 ]
 
 
