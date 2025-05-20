@@ -71,6 +71,8 @@ ALLOWED_HOSTS = [
     'www.pythoonadmin-1n4o.onrender.com',
 ]
 
+
+
 CSRF_TRUSTED_ORIGINS = [
     'https://geochain.app',
     'https://www.geochain.app',
