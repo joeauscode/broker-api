@@ -2,32 +2,59 @@ from django.contrib import admin
 from .models import Account, DepositHistory, WithdrawalHistory, Investment, InvestmentHistory
 from django.utils.html import format_html
 
-# Customizing the display of the Account model in the admin panel
+
+
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
     list_display = (
-        'user', 'balance', 'bitcoin_balance', 'ethereum_balance', 
-        'tron_balance', 'doge_balance', 'bitcoin_cash_balance', 'usdt_trc20_balance',
-        'bnb_balance', 'litecoin_balance', 'usdt_erc20_balance', 'binance_usd_balance',
-        'avatar_preview', 'date_created', 'last_updated', 'gold_balance', 'steel_balance', 
-        'iron_ore_balance', 'lithium_balance',        
+        'user', 'balance', 'avatar_preview', 'steel', 'iron_ore', 'lithium', 
+        'gold', 'kaolin', 'date_created', 'last_updated'        
     )
     search_fields = ('user__username',)
     list_filter = ('date_created',)
     ordering = ('-date_created',)
+
+    # ✅ Only editable fields here
     fields = (
-        'user', 'balance', 'bitcoin_balance', 'ethereum_balance', 
-        'tron_balance', 'doge_balance', 'bitcoin_cash_balance', 'usdt_trc20_balance',
-        'bnb_balance', 'litecoin_balance', 'usdt_erc20_balance', 'binance_usd_balance', 'avatar'
+        'user', 'balance', 'avatar', 'steel', 'iron_ore', 'lithium', 
+        'gold', 'kaolin'
     )
 
+    # ✅ Non-editable fields go here
+    readonly_fields = ('date_created', 'last_updated')
 
     def avatar_preview(self, obj):
         if obj.avatar:
-            return format_html('<img src="{}" width="50" height="50" style="object-fit: cover; border-radius: 50%;" />', obj.avatar.url)
+            return format_html(
+                '<img src="{}" width="50" height="50" style="object-fit: cover; border-radius: 50%;" />', 
+                obj.avatar.url
+            )
         return "-"
     avatar_preview.short_description = 'Avatar Preview'
 
+
+# @admin.register(Account)
+# class AccountAdmin(admin.ModelAdmin):
+#     list_display = (
+#         'user', 'balance', 'avatar_preview', 'steel', 'iron_ore', 'lithium', 
+#         'gold', 'kaolin', 'date_created', 'last_updated'        
+#     )
+#     search_fields = ('user__username',)
+#     list_filter = ('date_created',)
+#     ordering = ('-date_created',)
+#     fields = (
+#         'user', 'balance', 'avatar', 'steel', 'iron_ore', 'lithium', 
+#         'gold', 'kaolin', 'date_created', 'last_updated'
+#     )
+
+#     def avatar_preview(self, obj):
+#         if obj.avatar:
+#             return format_html(
+#                 '<img src="{}" width="50" height="50" style="object-fit: cover; border-radius: 50%;" />', 
+#                 obj.avatar.url
+#             )
+#         return "-"
+#     avatar_preview.short_description = 'Avatar Preview'
 
 
 @admin.register(Investment)
@@ -62,12 +89,6 @@ class WithdrawalHistoryAdmin(admin.ModelAdmin):
             'fields': ('account', 'crypto', 'amount', 'description', 'timestamp'),
         }),
     )
-
-
-
-
-
-
 
 
 @admin.register(InvestmentHistory)

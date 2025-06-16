@@ -1,19 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
-
 CRYPTO_CHOICES = [
-    ('BTC', 'Bitcoin'),
-    ('ETH', 'Ethereum'),
-    ('TRX', 'Tron'),
-    ('DOGE', 'Doge'),
-    ('BCH', 'Bitcoin Cash'),
-    ('USDT_TRC20', 'USDT TRC20'),
-    ('BNB', 'Binance Coin'),
-    ('LTC', 'Litecoin'),
-    ('USDT_ERC20', 'USDT ERC20'),
-    ('BUSD', 'Binance USD'),
+    ('FORGEX', 'Steel'),
+    ('FEVAULT', 'Iron Ore'),
+    ('CHARGECOIN', 'Lithium'),
+    ('AUXCOIN', 'Gold'),
+    ('WHITEEARTH', 'Kaolin'),
 ]
 
 GENDER_CHOICE = [
@@ -230,28 +223,14 @@ class Account(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-  
-    
 
-    # Investment (optional if still needed)
+    # Investment balances
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-
-    usdt_erc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    binance_usd_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    bnb_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    litecoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    # Cryptocurrency Balances
-    bitcoin_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    ethereum_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    tron_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    doge_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    bitcoin_cash_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    usdt_trc20_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    gold_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    steel_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    iron_ore_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    lithium_balance = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
-    
+    steel = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    iron_ore = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    lithium = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    gold = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
+    kaolin = models.DecimalField(max_digits=20, decimal_places=10, default=0.00)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
@@ -262,16 +241,11 @@ class Account(models.Model):
 
     def deposit(self, crypto: str, amount, description=""):
         field_map = {
-            'BTC': 'bitcoin_balance',
-            'ETH': 'ethereum_balance',
-            'TRX': 'tron_balance',
-            'DOGE': 'doge_balance',
-            'BCH': 'bitcoin_cash_balance',
-            'USDT_TRC20': 'usdt_trc20_balance',
-            'Gold': 'gold_balance',
-            'Steel': 'steel_balance',
-            'Iron ore': 'iron_ore_balance',
-            'Lithium': 'lithium_balance',
+            'FORGEX': 'steel',
+            'FEVAULT': 'iron_ore',
+            'CHARGECOIN': 'lithium',
+            'AUXCOIN': 'gold',
+            'WHITEEARTH': 'kaolin',
         }
         field = field_map.get(crypto)
         if not field:
@@ -290,17 +264,13 @@ class Account(models.Model):
 
     def withdraw(self, crypto: str, amount, description=""):
         field_map = {
-            'BTC': 'bitcoin_balance',
-            'ETH': 'ethereum_balance',
-            'TRX': 'tron_balance',
-            'DOGE': 'doge_balance',
-            'BCH': 'bitcoin_cash_balance',
-            'USDT_TRC20': 'usdt_trc20_balance',
-            'BNB': 'bnb_balance',
-            'LTC': 'litecoin_balance',
-            'USDT_ERC20': 'usdt_erc20_balance',
-            'BUSD': 'binance_usd_balance',
+            'FORGEX': 'steel',
+            'FEVAULT': 'iron_ore',
+            'CHARGECOIN': 'lithium',
+            'AUXCOIN': 'gold',
+            'WHITEEARTH': 'kaolin',
         }
+
         field = field_map.get(crypto)
         if not field:
             raise ValueError("Invalid cryptocurrency type")
@@ -321,7 +291,7 @@ class Account(models.Model):
 
 class DepositHistory(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='deposits')
-    crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES, default='BTC')
+    crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES)
     amount = models.DecimalField(max_digits=20, decimal_places=10)
     description = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -332,17 +302,16 @@ class DepositHistory(models.Model):
     @property
     def crypto_symbol(self):
         return {
-            'BTC': '₿', 'ETH': 'Ξ', 'TRX': '₮', 'DOGE': 'Ð',
-            'USDT_TRC20': '₮', 'USDT_ERC20': '₮', 'BUSD': '$',
-            'BCH': 'Ƀ', 'LTC': 'Ł', 'BNB': '⧫',
+            'FORGEX': '🔩',     
+            'FEVAULT': '⛓️',    
+            'CHARGECOIN': '⚡',  
+            'AUXCOIN': '🪙',     
+            'WHITEEARTH': '🏺',  
         }.get(self.crypto, '')
-
-    
-    
 
 class WithdrawalHistory(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE, related_name='withdrawals')
-    crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES, default='BTC')
+    crypto = models.CharField(max_length=20, choices=CRYPTO_CHOICES)
     amount = models.DecimalField(max_digits=20, decimal_places=10)
     description = models.TextField(blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -353,17 +322,12 @@ class WithdrawalHistory(models.Model):
     @property
     def crypto_symbol(self):
         return {
-            'BTC': '₿', 'ETH': 'Ξ', 'TRX': '₮', 'DOGE': 'Ð',
-            'USDT_TRC20': '₮', 'USDT_ERC20': '₮', 'BUSD': '$',
-            'BCH': 'Ƀ', 'LTC': 'Ł', 'BNB': '⧫',
+            'FORGEX': '🔩', 
+            'FEVAULT': '⛓️',   
+            'CHARGECOIN': '⚡',  
+            'AUXCOIN': '🪙',     
+            'WHITEEARTH': '🏺',  
         }.get(self.crypto, '')
-
-
-
-
-
-
-
 
 class Investment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='investments')
@@ -376,14 +340,6 @@ class Investment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.payment_method}"
-
-
-
-
-
-
-
-
 
 class InvestmentHistory(models.Model):
     STATUS_CHOICES = [
@@ -399,5 +355,3 @@ class InvestmentHistory(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     date = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.user.username} - {self.payment_method} - {self.amount} ({self.status})"
